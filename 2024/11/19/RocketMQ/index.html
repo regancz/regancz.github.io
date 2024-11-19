@@ -13,13 +13,13 @@
 <meta property="og:site_name" content="Garland">
 <meta property="og:description" content="Workflow RocketMQ是一个分布式的消息队列系统，它的工作流程包括以下几个步骤：  Producer发送消息：Producer将消息发送到指定的Topic，Topic可以理解为一个消息主题，所有订阅该主题的消费者都可以接收到这条消息。  NameServer路由：NameServer是RocketMQ的管理节点，Producer发送消息时会将消息发送给NameServer，然后根据To">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://regancz.github.io/rocketmq_arch.png">
-<meta property="og:image" content="https://regancz.github.io/rocketmq_transaction.png">
+<meta property="og:image" content="https://regancz.github.io/images/rocketmq_arch.png">
+<meta property="og:image" content="https://regancz.github.io/images/rocketmq_transaction.png">
 <meta property="article:published_time" content="2024-11-19T14:07:48.000Z">
-<meta property="article:modified_time" content="2024-11-19T14:51:34.875Z">
+<meta property="article:modified_time" content="2024-11-19T14:55:03.654Z">
 <meta property="article:author" content="Charles">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://regancz.github.io/rocketmq_arch.png">
+<meta name="twitter:image" content="https://regancz.github.io/images/rocketmq_arch.png">
   
     <link rel="alternate" href="/atom.xml" title="Garland" type="application/atom+xml">
   
@@ -96,7 +96,7 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="Workflow"><a href="#Workflow" class="headerlink" title="Workflow"></a>Workflow</h1><p><img src="/rocketmq_arch.png"></p>
+        <h1 id="Workflow"><a href="#Workflow" class="headerlink" title="Workflow"></a>Workflow</h1><p><img src="/images/rocketmq_arch.png"></p>
 <p>RocketMQ是一个分布式的消息队列系统，它的工作流程包括以下几个步骤：</p>
 <ol>
 <li><p>Producer发送消息：Producer将消息发送到指定的Topic，Topic可以理解为一个消息主题，所有订阅该主题的消费者都可以接收到这条消息。</p>
@@ -188,7 +188,7 @@
 </ol>
 </li>
 </ol>
-<h1 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h1><h2 id="消息事务"><a href="#消息事务" class="headerlink" title="消息事务"></a>消息事务</h2><p><img src="/rocketmq_transaction.png"></p>
+<h1 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h1><h2 id="消息事务"><a href="#消息事务" class="headerlink" title="消息事务"></a>消息事务</h2><p><img src="/images/rocketmq_transaction.png"></p>
 <p>RocketMQ是基于两阶段提交来实现的事务，把这些事务消息暂存在一个特殊的queue中，待事务提交后再移动到业务队列中。最后，RocketMQ的事务适用于解决本地事务和发消息的数据一致性问题。</p>
 <h2 id="零拷贝"><a href="#零拷贝" class="headerlink" title="零拷贝"></a>零拷贝</h2><p>参考 <a target="_blank" rel="noopener" href="https://juejin.cn/post/7076819003204698119#heading-6">https://juejin.cn/post/7076819003204698119#heading-6</a></p>
 
