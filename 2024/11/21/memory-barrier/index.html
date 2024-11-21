@@ -14,7 +14,7 @@
 <meta property="og:description" content="内存屏障（Memory barrier）为什么会有内存屏障 每个CPU都会有自己的缓存（有的甚至L1,L2,L3），缓存的目的就是为了提高性能，避免每次都要向内存取。但是这样的弊端也很明显：不能实时的和内存发生信息交换，分在不同CPU执行的不同线程对同一个变量的缓存值不同。  用volatile关键字修饰变量可以解决上述问题，那么volatile是如何做到这一点的呢？那就是内存屏障，内存屏障是硬件">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-11-21T01:42:59.000Z">
-<meta property="article:modified_time" content="2024-11-21T01:48:56.466Z">
+<meta property="article:modified_time" content="2024-11-21T01:55:38.327Z">
 <meta property="article:author" content="Charles">
 <meta name="twitter:card" content="summary">
   
@@ -93,32 +93,22 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="内存屏障（Memory-barrier）"><a href="#内存屏障（Memory-barrier）" class="headerlink" title="内存屏障（Memory barrier）"></a>内存屏障（Memory barrier）</h1><h2 id="为什么会有内存屏障"><a href="#为什么会有内存屏障" class="headerlink" title="为什么会有内存屏障"></a>为什么会有内存屏障</h2><ul>
+        <h2 id="内存屏障（Memory-barrier）"><a href="#内存屏障（Memory-barrier）" class="headerlink" title="内存屏障（Memory barrier）"></a>内存屏障（Memory barrier）</h2><h2 id="为什么会有内存屏障"><a href="#为什么会有内存屏障" class="headerlink" title="为什么会有内存屏障"></a>为什么会有内存屏障</h2><ul>
 <li><p>每个CPU都会有自己的缓存（有的甚至L1,L2,L3），缓存的目的就是为了提高性能，避免每次都要向内存取。但是这样的弊端也很明显：不能实时的和内存发生信息交换，分在不同CPU执行的不同线程对同一个变量的缓存值不同。</p>
 </li>
 <li><p>用volatile关键字修饰变量可以解决上述问题，那么volatile是如何做到这一点的呢？那就是内存屏障，内存屏障是硬件层的概念，不同的硬件平台实现内存屏障的手段并不是一样，java通过屏蔽这些差异，统一由jvm来生成内存屏障的指令。</p>
 </li>
 </ul>
-<h2 id="内存屏障是什么"><a href="#内存屏障是什么" class="headerlink" title="内存屏障是什么"></a>内存屏障是什么</h2><ul>
-<li><p>硬件层的内存屏障分为两种：<code>Load Barrier</code> 和 <code>Store Barrier</code>即读屏障和写屏障。</p>
-</li>
-<li><p>内存屏障有两个作用：</p>
-</li>
-</ul>
-<blockquote>
-<ol>
+<h2 id="内存屏障是什么"><a href="#内存屏障是什么" class="headerlink" title="内存屏障是什么"></a>内存屏障是什么</h2><p>硬件层的内存屏障分为两种：<code>Load Barrier</code> 和 <code>Store Barrier</code>即读屏障和写屏障。</p>
+<p>内存屏障有两个作用：</p>
+<ul>
 <li><p>阻止屏障两侧的指令重排序；</p>
 </li>
 <li><p>强制把写缓冲区&#x2F;高速缓存中的脏数据等写回主内存，让缓存中相应的数据失效。</p>
 </li>
-</ol>
-</blockquote>
-<ul>
-<li><p>对于Load Barrier来说，在指令前插入Load Barrier，可以让高速缓存中的数据失效，强制从新从主内存加载数据；</p>
-</li>
-<li><p>对于Store Barrier来说，在指令后插入Store Barrier，能让写入缓存中的最新数据更新写入主内存，让其他线程可见。</p>
-</li>
 </ul>
+<p>对于Load Barrier来说，在指令前插入Load Barrier，可以让高速缓存中的数据失效，强制从新从主内存加载数据；</p>
+<p>对于Store Barrier来说，在指令后插入Store Barrier，能让写入缓存中的最新数据更新写入主内存，让其他线程可见。</p>
 <h2 id="Java内存屏障"><a href="#Java内存屏障" class="headerlink" title="Java内存屏障"></a>Java内存屏障</h2><ul>
 <li><p>java的内存屏障通常所谓的四种即<code>LoadLoad</code>,<code>StoreStore</code>,<code>LoadStore</code>,<code>StoreLoad</code>实际上也是上述两种的组合，完成一系列的屏障和数据同步功能。</p>
 </li>
@@ -132,28 +122,21 @@
 </li>
 </ul>
 <h2 id="Volatile语义中的内存屏障"><a href="#Volatile语义中的内存屏障" class="headerlink" title="Volatile语义中的内存屏障"></a>Volatile语义中的内存屏障</h2><ul>
-<li>volatile的内存屏障策略非常严格保守，非常悲观且毫无安全感的心态：</li>
+<li><p>在每个volatile写操作前插入StoreStore屏障，在写操作后插入StoreLoad屏障</p>
+</li>
+<li><p>在每个volatile读操作前插入LoadLoad屏障，在读操作后插入LoadStore屏障</p>
+</li>
 </ul>
-<blockquote>
-<p>在每个volatile写操作前插入StoreStore屏障，在写操作后插入StoreLoad屏障；<br> 在每个volatile读操作前插入LoadLoad屏障，在读操作后插入LoadStore屏障；</p>
-</blockquote>
-<ul>
-<li>由于内存屏障的作用，避免了volatile变量和其它指令重排序、线程之间实现了通信，使得volatile表现出了锁的特性。</li>
-</ul>
-<h2 id="Final语义中的内存屏障"><a href="#Final语义中的内存屏障" class="headerlink" title="Final语义中的内存屏障"></a>Final语义中的内存屏障</h2><ul>
-<li>对于final域，编译器和CPU会遵循两个排序规则：</li>
-</ul>
-<blockquote>
+<p>由于内存屏障的作用，避免了volatile变量和其它指令重排序、线程之间实现了通信，使得volatile表现出了锁的特性。</p>
+<h2 id="Final语义中的内存屏障"><a href="#Final语义中的内存屏障" class="headerlink" title="Final语义中的内存屏障"></a>Final语义中的内存屏障</h2><p>对于final域，编译器和CPU会遵循两个排序规则：</p>
 <ol>
-<li><p>新建对象过程中，构造体中对final域的初始化写入和这个对象赋值给其他引用变量，这两个操作不能重排序；（废话嘛）</p>
+<li><p>新建对象过程中，构造体中对final域的初始化写入和这个对象赋值给其他引用变量，这两个操作不能重排序</p>
 </li>
 <li><p>初次读包含final域的对象引用和读取这个final域，这两个操作不能重排序；（晦涩，意思就是先赋值引用，再调用final值）</p>
 </li>
 </ol>
-</blockquote>
+<p>总之上面规则的意思可以这样理解，必需保证一个对象的所有final域被写入完毕后才能引用和读取。这也是内存屏障的起的作用：</p>
 <ul>
-<li><p>总之上面规则的意思可以这样理解，必需保证一个对象的所有final域被写入完毕后才能引用和读取。这也是内存屏障的起的作用：</p>
-</li>
 <li><p>写final域：在编译器写final域完毕，构造体结束之前，会插入一个StoreStore屏障，保证前面的对final写入对其他线程&#x2F;CPU可见，并阻止重排序。</p>
 </li>
 <li><p>读final域：在上述规则2中，两步操作不能重排序的机理就是在读final域前插入了LoadLoad屏障。</p>
